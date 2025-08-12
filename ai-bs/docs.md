@@ -1,7 +1,7 @@
 # Etymology Telegram Bot
 
 ## Purpose
-A Telegram bot that sends interesting etymologies to users at configurable intervals, specializing in cross-cultural word journeys and visual etymology trees. Users can select their preferred language (Kyrgyz, Russian, English) and areas of interest to receive personalized etymology content focusing on cultural bridges and historical migration paths.
+A Telegram bot that sends scientifically detailed etymologies to users at configurable minute intervals, specializing in cross-cultural word journeys and phonetic evolution analysis. Users select their preferred language (Kyrgyz, Russian, English) and receive automatically curated etymology content with detailed linguistic transformations and cultural migration paths.
 
 ## Architecture
 - **Bot Framework**: Grammy (modern Telegram bot library)
@@ -13,13 +13,14 @@ A Telegram bot that sends interesting etymologies to users at configurable inter
 
 ## Key Features
 - Language selection (Kyrgyz/Russian/English)
-- Interest sphere configuration with examples
-- Configurable send intervals (1-24 hours)
+- **Automatic curation** of fascinating etymologies from diverse fields
+- **Minute-based intervals** (1-60 minutes) for frequent discovery
 - Manual etymology requests with "More" button
-- **Visual tree diagrams** showing word evolution paths
+- **Scientific tree diagrams** with phonetic transcriptions (IPA)
+- **Detailed transformations**: phonetic laws, morphological changes, semantic evolution
 - **Cross-cultural etymology focus** (Silk Road, Soviet influence, Arabic/Persian borrowings)
-- Mixed etymology types (40% cultural, 60% standard)
-- Cultural migration routes and semantic evolution
+- Mixed etymology types (40% Central Asian cultural, 60% general scientific)
+- **Proto-form reconstructions** and cognate analysis
 - Etymologies written in user's chosen language
 
 ## Tech Stack
@@ -29,14 +30,16 @@ A Telegram bot that sends interesting etymologies to users at configurable inter
 - JSON file storage (simple approach)
 
 ## Etymology Format
-Visual trees showing cultural transmission:
+Scientific trees showing detailed linguistic evolution:
 
 ```
-WORD
-├── Origin: [language/culture, time period]
-├── Route: lang₁ → lang₂ → lang₃ → modern
-├── Cultural Context: [trade/religion/politics/science]
-└── Components: root₁(meaning) + root₂(meaning)
+WORD [/modern_IPA/]
+├── Proto-form: *reconstruction [/proto_phonetic/]
+├── Phonetic Evolution: [detailed sound changes]
+├── Morphological Changes: [grammatical transformations]
+├── Semantic Evolution: [meaning shifts with dates]
+├── Cultural Route: lang₁ → lang₂ → lang₃ → modern
+└── Root Analysis: morpheme₁(meaning) + morpheme₂(meaning)
 ```
 
 ## Cultural Focus Areas
@@ -49,6 +52,7 @@ WORD
 ## User Flow
 1. User starts bot
 2. Selects language (ky/ru/en)
-3. Chooses interest spheres (technology, cooking, medicine, etc.)
-4. Sets sending interval (1-24h)
-5. Receives periodic etymologies (mixed cultural + standard) + can request more
+3. Sets sending interval (1-60 minutes)
+4. Receives periodic scientific etymologies (auto-curated from diverse fields)
+5. Gets mixed content: 40% Central Asian cultural + 60% general scientific
+6. Can request more etymologies manually

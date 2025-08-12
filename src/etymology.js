@@ -5,9 +5,12 @@ const openai = new OpenAI({
 });
 
 const LANGUAGE_PROMPTS = {
-  english: "Create a concise etymology with visual tree diagrams in English",
-  russian: "Создай краткую этимологию с визуальными диаграммами на русском",
-  kyrgyz: "Кыргыз тилинде кыска этимология жана көрүнүктүү диаграмма түзүңүз",
+  english:
+    "Create a detailed scientific etymology with phonetic transformations in English",
+  russian:
+    "Создай детальную научную этимологию с фонетическими трансформациями на русском",
+  kyrgyz:
+    "Кыргыз тилинде толук илимий этимология жана үн өзгөрүүлөрү менен түзүңүз",
 };
 
 const INTEREST_EXAMPLES = {
@@ -23,36 +26,47 @@ export function getInterestExamples(language) {
   return INTEREST_EXAMPLES[language] || INTEREST_EXAMPLES.english;
 }
 
-export async function generateEtymology(language, interests) {
+export async function generateEtymology(language) {
   try {
     const basePrompt = LANGUAGE_PROMPTS[language] || LANGUAGE_PROMPTS.english;
-    const interestList = Array.isArray(interests)
-      ? interests.join(", ")
-      : interests;
 
-    const prompt = `${basePrompt} about a word from: ${interestList}.
+    const prompt = `${basePrompt} about any fascinating word from diverse fields: technology, science, medicine, linguistics, history, literature, mythology, anthropology, psychology, astronomy, biology, chemistry, physics, philosophy, arts, music, architecture, etc.
 
-Format with VISUAL TREE + mathematical breakdown:
+Format with SCIENTIFIC TREE + detailed transformations:
 
-WORD
-├── Origin: [language/culture, time period]
-├── Route: lang₁ → lang₂ → lang₃ → modern
-├── Cultural Context: [trade/religion/politics/science]
-└── Components: root₁(meaning) + root₂(meaning)
+WORD [/phonetic_modern/]
+├── Proto-form: *reconstruction [/proto_phonetic/]
+├── Phonetic Evolution: [detailed sound changes]
+├── Morphological Changes: [grammatical transformations]
+├── Semantic Evolution: [meaning shifts with dates]
+├── Cultural Route: lang₁ → lang₂ → lang₃ → modern
+└── Root Analysis: morpheme₁(meaning) + morpheme₂(meaning)
 
-Then explain:
-- Historical migration path between cultures
-- Semantic shifts during cultural transfer
-- Modern cross-linguistic connections
+Then explain with scientific detail:
+- Precise phonetic transformations (sound laws, regular changes)
+- Morphological adaptations (grammatical category shifts)
+- Semantic evolution with historical context
+- Cross-linguistic cognates and related forms
+- Modern dialectal variations
 
 Examples:
-ALGORITHM
-├── Origin: Arabic (al-Khwarizmi, ~825 CE)
-├── Route: Arabic → Medieval Latin → European languages
-├── Cultural Context: Islamic Golden Age mathematics
-└── Components: al(the) + Khwarizmi(from Khwarezm region)
+ALGORITHM [/ˈælɡərɪðəm/]
+├── Proto-form: *al-Khwārizmī [/al.xwaː.ɾiz.miː/]
+├── Phonetic Evolution: [xw] → [ɡ], [iː] → [ɪ], stress shift
+├── Morphological Changes: Arabic proper noun → European common noun
+├── Semantic Evolution: "from Khwarezm" → "calculation method" → "computer procedure"
+├── Cultural Route: Arabic (9th c.) → Medieval Latin algorismus → Old French → English
+└── Root Analysis: al(definite article) + Khwārizm(Central Asian region)
 
-Be analytical and informative. Around 200 words. Write entirely in ${language === "kyrgyz" ? "Kyrgyz" : language === "russian" ? "Russian" : "English"}.
+PSYCHOLOGY [/saɪˈkɒlədʒi/]
+├── Proto-form: *psūkhē-logos [/psuː.kʰeː.lo.ɡos/]
+├── Phonetic Evolution: [ps] → [s], vowel reduction, stress shift
+├── Morphological Changes: Greek compound → Latin borrowing → vernacular adaptation
+├── Semantic Evolution: "soul study" → "mind study" → "behavior science"
+├── Cultural Route: Ancient Greek → Latin → French psychologie → English
+└── Root Analysis: psūkhē(soul/breath) + logos(study/discourse)
+
+Be highly scientific and precise. Around 250 words with detailed phonetic and morphological analysis. Write entirely in ${language === "kyrgyz" ? "Kyrgyz" : language === "russian" ? "Russian" : "English"}.
 
 Use simple formatting - avoid special characters that need escaping.`;
 
@@ -62,15 +76,15 @@ Use simple formatting - avoid special characters that need escaping.`;
         {
           role: "system",
           content:
-            "You are a linguist who presents etymologies as visual trees showing cultural transmission paths. Use precise analysis, show morphological breakdowns, and explain semantic evolution clearly. Use simple formatting - avoid special characters.",
+            "You are a historical linguist specializing in phonetic and morphological evolution. Present etymologies with detailed sound changes, morphological adaptations, and precise semantic development. Include IPA phonetic transcriptions, reconstruction of proto-forms, and step-by-step transformation processes. Focus on regular sound laws and systematic changes.",
         },
         {
           role: "user",
           content: prompt,
         },
       ],
-      max_tokens: 350,
-      temperature: 0.9,
+      max_tokens: 400,
+      temperature: 0.7,
     });
 
     const content = response.choices[0]?.message?.content;
@@ -92,41 +106,43 @@ Use simple formatting - avoid special characters that need escaping.`;
   }
 }
 
-export async function generateCentralAsianEtymology(language, interests) {
+export async function generateCentralAsianEtymology(language) {
   try {
     const basePrompt = LANGUAGE_PROMPTS[language] || LANGUAGE_PROMPTS.english;
-    const interestList = Array.isArray(interests)
-      ? interests.join(", ")
-      : interests;
 
-    const culturalPrompt = `${basePrompt} about a word from: ${interestList}.
+    const culturalPrompt = `${basePrompt} focusing on Central Asian etymology and Silk Road word migrations.
 
-FOCUS: Central Asian cultural bridges and Silk Road etymologies.
+FOCUS: Scientific analysis of Central Asian etymology with detailed transformations.
 
-Priority word types:
-- Kyrgyz words borrowed from Arabic/Persian (Islamic influence)
-- Russian words that entered Kyrgyz during Soviet period
-- Ancient Turkic words spread across language families
-- Trade words that traveled the Silk Road
-- Words showing nomadic to settled cultural transitions
+Priority areas:
+- Kyrgyz-Persian-Arabic contact linguistics (Islamic scholarly transmission)
+- Russian-Kyrgyz phonetic adaptations (Soviet language contact)
+- Ancient Turkic reconstructions and cognate analysis
+- Silk Road trade terminology with systematic sound changes
+- Nomadic-to-sedentary cultural linguistic shifts
 
-Format with CULTURAL TREE:
+Format with SCIENTIFIC CULTURAL TREE:
 
-WORD
-├── Origin: [language/culture, time period]
-├── Migration: [why it traveled - trade/religion/politics]
-├── Route: source → intermediary → Kyrgyz/Russian/English
-├── Adaptations: [how pronunciation/meaning changed]
-└── Roots: component₁(meaning) + component₂(meaning)
+WORD [/modern_IPA/]
+├── Etymology: *proto-form [/proto_IPA/] → intermediate [/inter_IPA/]
+├── Phonetic Laws: [specific sound change rules]
+├── Morphological Adaptation: [grammatical category changes]
+├── Semantic Development: [meaning evolution with dates]
+├── Cultural Transmission: [detailed migration context]
+├── Route: source_lang(date) → intermediate(date) → target(date)
+└── Cognates: [related forms in other languages]
 
-Examples of good targets:
-- бакча (garden) from Persian bāgh
-- машина (machine) Russian to Kyrgyz
-- чай (tea) Chinese chá via Silk Road
-- китеп (book) from Arabic kitāb
-- базар (market) from Persian bāzār
+Examples:
+БАКЧА [/bɑq.t͡ʃɑ/] "garden"
+├── Etymology: Persian bāgh [/baːɣ/] → Kyrgyz bakcha
+├── Phonetic Laws: [ɣ] → [q] → [t͡ʃ], vowel harmony adaptation
+├── Morphological Adaptation: Persian noun → Kyrgyz noun + diminutive -ча
+├── Semantic Development: "enclosed space" → "walled garden" → "vegetable garden"
+├── Cultural Transmission: Islamic agricultural practices, 10th-12th centuries
+├── Route: Old Persian (6th c.) → Classical Persian (9th c.) → Chagatai Turkic → Kyrgyz
+└── Cognates: Uzbek bog'cha, Kazakh бақша, Turkish bahçe
 
-Show the cultural story behind the word journey. Around 200 words in ${language === "kyrgyz" ? "Kyrgyz" : language === "russian" ? "Russian" : "English"}.`;
+Show precise linguistic analysis with scientific methodology. Around 280 words in ${language === "kyrgyz" ? "Kyrgyz" : language === "russian" ? "Russian" : "English"}.`;
 
     const response = await openai.chat.completions.create({
       model: "gpt-4",
@@ -134,15 +150,15 @@ Show the cultural story behind the word journey. Around 200 words in ${language 
         {
           role: "system",
           content:
-            "You are a specialist in Central Asian linguistic history and Silk Road etymology. Focus on words that show cultural contact between Turkic, Persian, Arabic, Russian, and Chinese civilizations. Show how words moved with people, trade, and ideas.",
+            "You are a specialist in Central Asian historical linguistics with expertise in phonetic laws, morphological reconstruction, and contact linguistics. Provide detailed scientific analysis of word transformations including IPA transcriptions, proto-form reconstructions, regular sound changes, and precise semantic development. Focus on Turkic-Persian-Arabic-Russian language contact.",
         },
         {
           role: "user",
           content: culturalPrompt,
         },
       ],
-      max_tokens: 350,
-      temperature: 0.8,
+      max_tokens: 450,
+      temperature: 0.6,
     });
 
     return (

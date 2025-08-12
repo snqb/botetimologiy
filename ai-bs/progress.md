@@ -11,8 +11,8 @@
 - [x] OpenAI integration for etymology generation
 - [x] User preferences storage with JSON files
 - [x] Language selection (Kyrgyz, Russian, English)
-- [x] Interest sphere configuration with examples
-- [x] Interval setting with 1-24 hour validation
+- [x] Simplified setup flow (no interest selection - auto-curated)
+- [x] Interval setting with 1-60 minute validation
 - [x] Manual etymology requests with /etymology command
 - [x] "More" button functionality with inline keyboards
 - [x] Scheduled sending system
@@ -23,6 +23,10 @@
 - [x] Visual tree diagrams showing word evolution paths
 - [x] Cross-cultural etymology focus (Silk Road, Soviet influence, Arabic/Persian borrowings)
 - [x] Cultural migration routes in etymology explanations
+- [x] **Scientific etymology approach**: detailed phonetic transformations with IPA
+- [x] **Proto-form reconstructions** and morphological analysis
+- [x] **Auto-curation**: fascinating words from diverse fields without user input
+- [x] **Minute-based intervals**: 1-60 minutes instead of hours
 - [x] Dockerfile for containerized deployment
 - [x] Railway.json for Railway platform deployment
 
@@ -36,12 +40,12 @@
 - [x] Docker build working successfully
 
 ### Next Steps
-1. Verify OpenAI API integration with new cultural prompts
-2. Test visual tree formatting in Telegram
-3. Test scheduling functionality with mixed etymology types
+1. Verify OpenAI API integration with scientific prompts
+2. Test scientific tree formatting with IPA in Telegram
+3. Test minute-based scheduling functionality
 4. Deploy to Railway platform
-5. Optional: Add etymology type preferences (cultural vs standard)
-6. Optional: Add etymology favoriting/bookmarking
+5. Optional: Add etymology complexity preferences
+6. Optional: Add cognate exploration features
 
 ### Technical Decisions
 - **Bot Framework**: Grammy (modern, TypeScript-friendly)
@@ -54,8 +58,9 @@
 - Keep it minimal - no classes, just functions
 - Use pnpm for package management
 - Support 3 languages: Kyrgyz, Russian, English
-- Interval limits: 1-24 hours (sane bounds)
-- Allow repeats (simpler implementation)
+- Interval limits: 1-60 minutes (frequent discovery)
+- Auto-curated content (no user interest input needed)
+- Scientific approach with IPA, proto-forms, detailed transformations
 
 ### Issues/Blockers
 - Fixed: Callback query timeout errors when bot restarts
@@ -92,14 +97,17 @@ docker run -d --name etymology-bot \
 ```
 
 ### Latest Updates
-- Made etymologies mathematical and analytical
-- Added visual tree diagram format with cultural migration paths
+- **Scientific etymology approach**: detailed phonetic transformations with IPA
+- **Proto-form reconstructions** and morphological evolution analysis
+- **Simplified user flow**: removed interest selection, auto-curated content
+- **Minute-based intervals**: 1-60 minutes instead of hours for frequent discovery
+- Added scientific tree diagram format with detailed linguistic transformations
 - Enhanced with cross-cultural etymology focus (Silk Road, Soviet, Arabic/Persian)
-- Clean professional tone without emojis
-- 200-word responses with full context and cultural analysis
-- Fixed callback query timeout errors with proper error handling
+- Clean analytical tone with scientific methodology
+- 250-280 word responses with precise linguistic analysis
+- Fixed callback query timeout errors and Docker build issues
 - Added specialized Central Asian etymology generation (40% random chance)
 - Implemented loading indicators with typing chat actions
-- Created interactive menu system with multilingual support
-- Added bot command menu for better UX
-- Focus on words that traveled between civilizations and cultures
+- Created simplified settings menu (language + interval only)
+- Added cognate analysis and systematic sound change documentation
+- Focus on precise phonetic laws and morphological adaptations

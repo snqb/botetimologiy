@@ -25,28 +25,25 @@ const LANGUAGES = {
 const MESSAGES = {
   kyrgyz: {
     welcome: "Саламатсызбы! Этимология ботуна кош келиңиз! 🌟\nТилди тандаңыз:",
-    interests: "Кызыгуучу тармактарыңызды жазыңыз (үлгү)",
-    interval: "Канча саатта бир этимология алгыңыз келет? (1-24 саат)",
+    interval: "Канча мүнөттө бир этимология алгыңыз келет? (1-60 мүнөт)",
     setup_complete:
       "Жөндөө аяктады! Этимология алуу үчүн /etymology колдонуңуз",
-    invalid_interval: "Сураныч, 1дөн 24кө чейинки сан жазыңыз",
+    invalid_interval: "Сураныч, 1дөн 60га чейинки сан жазыңыз",
     error: "Ката кетти. Кайрадан аракет кылыңыз.",
   },
   russian: {
     welcome: "Привет! Добро пожаловать в бот этимологии! 🌟\nВыберите язык:",
-    interests: "Напишите ваши сферы интересов (например",
-    interval: "Как часто отправлять этимологии? (1-24 часа)",
+    interval: "Как часто отправлять этимологии? (1-60 минут)",
     setup_complete:
       "Настройка завершена! Используйте /etymology для получения этимологии",
-    invalid_interval: "Пожалуйста, введите число от 1 до 24",
+    invalid_interval: "Пожалуйста, введите число от 1 до 60",
     error: "Произошла ошибка. Попробуйте еще раз.",
   },
   english: {
     welcome: "Hello! Welcome to the Etymology Bot! 🌟\nSelect your language:",
-    interests: "Write your spheres of interest (example",
-    interval: "How often should I send etymologies? (1-24 hours)",
+    interval: "How often should I send etymologies? (1-60 minutes)",
     setup_complete: "Setup complete! Use /etymology to get an etymology",
-    invalid_interval: "Please enter a number between 1 and 24",
+    invalid_interval: "Please enter a number between 1 and 60",
     error: "An error occurred. Please try again.",
   },
 };
@@ -94,17 +91,14 @@ function createSettingsMenu(language) {
 
   if (language === "kyrgyz") {
     menu.text("🌐 Тил өзгөртүү", "change_language").row();
-    menu.text("🎯 Кызыкчылыктар", "change_interests").row();
     menu.text("⏰ Интервал", "change_interval").row();
     menu.text("🔙 Артка", "main_menu").row();
   } else if (language === "russian") {
     menu.text("🌐 Изменить язык", "change_language").row();
-    menu.text("🎯 Интересы", "change_interests").row();
     menu.text("⏰ Интервал", "change_interval").row();
     menu.text("🔙 Назад", "main_menu").row();
   } else {
     menu.text("🌐 Change Language", "change_language").row();
-    menu.text("🎯 Interests", "change_interests").row();
     menu.text("⏰ Interval", "change_interval").row();
     menu.text("🔙 Back", "main_menu").row();
   }
@@ -140,7 +134,7 @@ bot.command("menu", async (ctx) => {
 
 bot.command("etymology", async (ctx) => {
   const user = getUser(ctx.from.id);
-  if (!user || !user.language || !user.interests) {
+  if (!user || !user.language) {
     await ctx.reply("Please setup the bot first with /start");
     return;
   }
@@ -152,8 +146,8 @@ bot.command("etymology", async (ctx) => {
     // Use enhanced cultural etymology 40% of the time
     const useCultural = Math.random() < 0.4;
     const etymology = useCultural
-      ? await generateCentralAsianEtymology(user.language, user.interests)
-      : await generateEtymology(user.language, user.interests);
+      ? await generateCentralAsianEtymology(user.language)
+      : await generateEtymology(user.language);
 
     await ctx.reply(etymology, {
       reply_markup: createMoreButton(user.language),
@@ -181,24 +175,16 @@ bot.on("message:text", async (ctx) => {
     const selectedLang = LANGUAGES[text];
     if (selectedLang) {
       saveUser(userId, { language: selectedLang });
-      userStates.set(userId, "entering_interests");
+      userStates.set(userId, "setting_interval");
 
-      const examples = getInterestExamples(selectedLang);
       const msg = MESSAGES[selectedLang];
-      await ctx.reply(`${msg.interests}: ${examples})`, {
+      await ctx.reply(msg.interval, {
         reply_markup: { remove_keyboard: true },
       });
     }
-  } else if (state === "entering_interests") {
-    const user = getUser(userId);
-    saveUser(userId, { interests: text.split(",").map((s) => s.trim()) });
-    userStates.set(userId, "setting_interval");
-
-    const msg = MESSAGES[user.language];
-    await ctx.reply(msg.interval);
   } else if (state === "setting_interval") {
-    const hours = parseInt(text);
-    if (isNaN(hours) || hours < 1 || hours > 24) {
+    const minutes = parseInt(text);
+    if (isNaN(minutes) || minutes < 1 || minutes > 60) {
       const user = getUser(userId);
       const msg = MESSAGES[user.language];
       await ctx.reply(msg.invalid_interval);
@@ -206,7 +192,7 @@ bot.on("message:text", async (ctx) => {
     }
 
     const user = getUser(userId);
-    saveUser(userId, { interval: hours });
+    saveUser(userId, { interval: minutes });
     userStates.delete(userId);
 
     const msg = MESSAGES[user.language];
@@ -220,7 +206,7 @@ bot.on("callback_query:data", async (ctx) => {
     const user = getUser(ctx.from.id);
 
     if (data === "more_etymology") {
-      if (user && user.language && user.interests) {
+      if (user && user.language) {
         try {
           // Show typing indicator
           await ctx.replyWithChatAction("typing");
@@ -228,8 +214,8 @@ bot.on("callback_query:data", async (ctx) => {
           // Use enhanced cultural etymology 40% of the time
           const useCultural = Math.random() < 0.4;
           const etymology = useCultural
-            ? await generateCentralAsianEtymology(user.language, user.interests)
-            : await generateEtymology(user.language, user.interests);
+            ? await generateCentralAsianEtymology(user.language)
+            : await generateEtymology(user.language);
 
           await ctx.editMessageText(etymology, {
             reply_markup: createMoreButton(user.language),
@@ -244,15 +230,15 @@ bot.on("callback_query:data", async (ctx) => {
         await ctx.answerCallbackQuery("Please setup the bot first with /start");
       }
     } else if (data === "get_etymology") {
-      if (user && user.language && user.interests) {
+      if (user && user.language) {
         try {
           await ctx.replyWithChatAction("typing");
 
           // Use enhanced cultural etymology 40% of the time
           const useCultural = Math.random() < 0.4;
           const etymology = useCultural
-            ? await generateCentralAsianEtymology(user.language, user.interests)
-            : await generateEtymology(user.language, user.interests);
+            ? await generateCentralAsianEtymology(user.language)
+            : await generateEtymology(user.language);
 
           await ctx.reply(etymology, {
             reply_markup: createMoreButton(user.language),
@@ -300,14 +286,6 @@ bot.on("callback_query:data", async (ctx) => {
         reply_markup: createLanguageKeyboard(),
       });
       await ctx.answerCallbackQuery();
-    } else if (data === "change_interests") {
-      if (user && user.language) {
-        userStates.set(ctx.from.id, "entering_interests");
-        const examples = getInterestExamples(user.language);
-        const msg = MESSAGES[user.language];
-        await ctx.editMessageText(`${msg.interests}: ${examples})`);
-        await ctx.answerCallbackQuery();
-      }
     } else if (data === "change_interval") {
       if (user && user.language) {
         userStates.set(ctx.from.id, "setting_interval");
@@ -340,44 +318,38 @@ bot.on("callback_query:data", async (ctx) => {
 
 // Scheduled sending
 function startScheduledSending() {
-  setInterval(
-    async () => {
-      const users = getUsersWithIntervals();
-      const now = new Date();
+  setInterval(async () => {
+    const users = getUsersWithIntervals();
+    const now = new Date();
 
-      for (const user of users) {
-        const lastSent = user.lastSent ? new Date(user.lastSent) : new Date(0);
-        const hoursDiff = (now - lastSent) / (1000 * 60 * 60);
+    for (const user of users) {
+      const lastSent = user.lastSent ? new Date(user.lastSent) : new Date(0);
+      const minutesDiff = (now - lastSent) / (1000 * 60);
 
-        if (hoursDiff >= user.interval) {
-          try {
-            // Show typing indicator for scheduled messages
-            await bot.api.sendChatAction(user.userId, "typing");
+      if (minutesDiff >= user.interval) {
+        try {
+          // Show typing indicator for scheduled messages
+          await bot.api.sendChatAction(user.userId, "typing");
 
-            // Use enhanced cultural etymology 40% of the time
-            const useCultural = Math.random() < 0.4;
-            const etymology = useCultural
-              ? await generateCentralAsianEtymology(
-                  user.language,
-                  user.interests,
-                )
-              : await generateEtymology(user.language, user.interests);
+          // Use enhanced cultural etymology 40% of the time
+          const useCultural = Math.random() < 0.4;
+          const etymology = useCultural
+            ? await generateCentralAsianEtymology(user.language)
+            : await generateEtymology(user.language);
 
-            await bot.api.sendMessage(user.userId, etymology, {
-              reply_markup: createMoreButton(user.language),
-            });
-            saveUser(user.userId, { lastSent: now.toISOString() });
-          } catch (error) {
-            console.error(
-              `Failed to send to user ${user.userId}:`,
-              error.message,
-            );
-          }
+          await bot.api.sendMessage(user.userId, etymology, {
+            reply_markup: createMoreButton(user.language),
+          });
+          saveUser(user.userId, { lastSent: now.toISOString() });
+        } catch (error) {
+          console.error(
+            `Failed to send to user ${user.userId}:`,
+            error.message,
+          );
         }
       }
-    },
-    60 * 60 * 1000,
-  ); // Check every hour
+    }
+  }, 60 * 1000); // Check every minute
 }
 
 // Add error handler

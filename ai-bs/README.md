@@ -68,22 +68,34 @@ pnpm start
 
 1. Start conversation with your bot
 2. Select language: Kyrgyz, Russian, or English
-3. Choose interest spheres (examples provided)
-4. Set sending interval (1-24 hours)
-5. Receive etymologies automatically or request with `/etymology`
+3. Set sending interval (1-60 minutes)
+4. Receive scientific etymologies automatically (auto-curated from diverse fields)
+5. Get detailed phonetic transformations and cultural migration paths
+6. Request more etymologies with `/etymology`
 
 ## Commands
-- `/start` - Setup bot preferences
+- `/start` - Setup bot (language + interval)
 - `/etymology` - Get etymology now
-- `/settings` - Change language/interests/interval
+- `/menu` - Open interactive menu
+- `/settings` - Change language/interval
+
+## Features
+- **Scientific approach**: Detailed phonetic transformations with IPA
+- **Proto-form reconstructions**: Historical linguistic analysis  
+- **Cultural focus**: 40% Central Asian/Silk Road etymologies
+- **Auto-curation**: No need to specify interests - bot picks fascinating words
+- **Minute intervals**: Fast delivery (1-60 minutes vs hours)
+- **Morphological analysis**: Grammatical transformation tracking
 
 ## Project Structure
 ```
 ├── src/
-│   ├── bot.js          # Main bot logic
-│   ├── etymology.js    # OpenAI integration
+│   ├── bot.js          # Main bot logic + simplified flow
+│   ├── etymology.js    # Enhanced scientific etymology generation
 │   └── storage.js      # User data management
 ├── data/
-│   └── users.json      # User preferences
+│   └── users.json      # User preferences (language + interval only)
+├── Dockerfile          # Container deployment
+├── railway.json        # Railway platform config
 └── package.json
 ```
