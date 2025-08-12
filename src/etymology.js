@@ -66,7 +66,7 @@ PSYCHOLOGY [/saɪˈkɒlədʒi/]
 ├── Cultural Route: Ancient Greek → Latin → French psychologie → English
 └── Root Analysis: psūkhē(soul/breath) + logos(study/discourse)
 
-Be highly scientific and precise. Around 250 words with detailed phonetic and morphological analysis. Write entirely in ${language === "kyrgyz" ? "Kyrgyz" : language === "russian" ? "Russian" : "English"}.
+Be scientific and concise. Around 150 words maximum with key transformations. Write entirely in ${language === "kyrgyz" ? "Kyrgyz" : language === "russian" ? "Russian" : "English"}.
 
 Use simple formatting - avoid special characters that need escaping.`;
 
@@ -83,7 +83,7 @@ Use simple formatting - avoid special characters that need escaping.`;
           content: prompt,
         },
       ],
-      max_tokens: 400,
+      max_tokens: 250,
       temperature: 0.7,
     });
 
@@ -91,6 +91,12 @@ Use simple formatting - avoid special characters that need escaping.`;
     if (!content) {
       console.error("No content in OpenAI response:", response);
       throw new Error("Empty response from OpenAI");
+    }
+
+    // Check message length for Telegram limits (4096 chars)
+    if (content.length > 4000) {
+      console.warn(`Etymology too long: ${content.length} chars, truncating`);
+      return content.substring(0, 3800) + "\n\n[...]";
     }
 
     return content;
@@ -142,7 +148,7 @@ Examples:
 ├── Route: Old Persian (6th c.) → Classical Persian (9th c.) → Chagatai Turkic → Kyrgyz
 └── Cognates: Uzbek bog'cha, Kazakh бақша, Turkish bahçe
 
-Show precise linguistic analysis with scientific methodology. Around 280 words in ${language === "kyrgyz" ? "Kyrgyz" : language === "russian" ? "Russian" : "English"}.`;
+Show precise linguistic analysis with scientific methodology. Around 150 words maximum in ${language === "kyrgyz" ? "Kyrgyz" : language === "russian" ? "Russian" : "English"}.`;
 
     const response = await openai.chat.completions.create({
       model: "gpt-4",
@@ -157,13 +163,22 @@ Show precise linguistic analysis with scientific methodology. Around 280 words i
           content: culturalPrompt,
         },
       ],
-      max_tokens: 450,
+      max_tokens: 250,
       temperature: 0.6,
     });
 
-    return (
-      response.choices[0]?.message?.content || "Etymology generation failed"
-    );
+    const content =
+      response.choices[0]?.message?.content || "Etymology generation failed";
+
+    // Check message length for Telegram limits (4096 chars)
+    if (content.length > 4000) {
+      console.warn(
+        `Central Asian etymology too long: ${content.length} chars, truncating`,
+      );
+      return content.substring(0, 3800) + "\n\n[...]";
+    }
+
+    return content;
   } catch (error) {
     console.error("Central Asian etymology error:", error);
     throw error;
