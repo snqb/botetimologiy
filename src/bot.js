@@ -3,6 +3,7 @@ import { config } from "dotenv";
 import { getUser, saveUser, getUsersWithIntervals } from "./storage.js";
 import {
   generateEtymology,
+  generateEtymologyDetails,
   generateCentralAsianEtymology,
   getInterestExamples,
 } from "./etymology.js";
@@ -56,14 +57,24 @@ function createLanguageKeyboard() {
   return keyboard.resized();
 }
 
-function createMoreButton(language) {
+function createEtymologyButtons(language) {
   const moreText =
     language === "kyrgyz"
       ? "Дагы 📚"
       : language === "russian"
         ? "Ещё 📚"
         : "More 📚";
-  return new InlineKeyboard().text(moreText, "more_etymology");
+
+  const detailsText =
+    language === "kyrgyz"
+      ? "Толук маалымат 🔬"
+      : language === "russian"
+        ? "Подробности 🔬"
+        : "Details 🔬";
+
+  return new InlineKeyboard()
+    .text(detailsText, "etymology_details")
+    .text(moreText, "more_etymology");
 }
 
 function createMainMenu(language) {
@@ -150,7 +161,7 @@ bot.command("etymology", async (ctx) => {
       : await generateEtymology(user.language);
 
     await ctx.reply(etymology, {
-      reply_markup: createMoreButton(user.language),
+      reply_markup: createEtymologyButtons(user.language),
     });
   } catch (error) {
     console.error("Etymology command error:", error.message);
@@ -205,7 +216,28 @@ bot.on("callback_query:data", async (ctx) => {
     const data = ctx.callbackQuery.data;
     const user = getUser(ctx.from.id);
 
-    if (data === "more_etymology") {
+    if (data === "etymology_details") {
+      if (user && user.language) {
+        try {
+          await ctx.replyWithChatAction("typing");
+
+          // Extract word from current message for details
+          const currentText = ctx.callbackQuery.message.text;
+          const wordMatch = currentText.match(/^(\S+)/);
+          const word = wordMatch ? wordMatch[1] : "word";
+
+          const details = await generateEtymologyDetails(user.language, word);
+          await ctx.reply(details);
+          await ctx.answerCallbackQuery();
+        } catch (error) {
+          console.error("Details button error:", error.message);
+          const msg = MESSAGES[user.language] || MESSAGES.english;
+          await ctx.answerCallbackQuery(`${msg.error}: ${error.message}`);
+        }
+      } else {
+        await ctx.answerCallbackQuery("Please setup the bot first with /start");
+      }
+    } else if (data === "more_etymology") {
       if (user && user.language) {
         try {
           // Show typing indicator
@@ -218,7 +250,7 @@ bot.on("callback_query:data", async (ctx) => {
             : await generateEtymology(user.language);
 
           await ctx.editMessageText(etymology, {
-            reply_markup: createMoreButton(user.language),
+            reply_markup: createEtymologyButtons(user.language),
           });
           await ctx.answerCallbackQuery();
         } catch (error) {
@@ -241,7 +273,7 @@ bot.on("callback_query:data", async (ctx) => {
             : await generateEtymology(user.language);
 
           await ctx.reply(etymology, {
-            reply_markup: createMoreButton(user.language),
+            reply_markup: createEtymologyButtons(user.language),
           });
           await ctx.answerCallbackQuery();
         } catch (error) {
@@ -338,7 +370,7 @@ function startScheduledSending() {
             : await generateEtymology(user.language);
 
           await bot.api.sendMessage(user.userId, etymology, {
-            reply_markup: createMoreButton(user.language),
+            reply_markup: createEtymologyButtons(user.language),
           });
           saveUser(user.userId, { lastSent: now.toISOString() });
         } catch (error) {

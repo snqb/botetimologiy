@@ -26,49 +26,32 @@ export function getInterestExamples(language) {
   return INTEREST_EXAMPLES[language] || INTEREST_EXAMPLES.english;
 }
 
-export async function generateEtymology(language) {
+export async function generateEtymologyTree(language) {
   try {
     const basePrompt = LANGUAGE_PROMPTS[language] || LANGUAGE_PROMPTS.english;
 
-    const prompt = `${basePrompt} about any fascinating word from diverse fields: technology, science, medicine, linguistics, history, literature, mythology, anthropology, psychology, astronomy, biology, chemistry, physics, philosophy, arts, music, architecture, etc.
+    const prompt = `${basePrompt} - create ONLY the visual tree diagram for a fascinating word from any field.
 
-Format with SCIENTIFIC TREE + detailed transformations:
+Format: COMPACT TREE ONLY (no explanatory text):
 
-WORD [/phonetic_modern/]
-├── Proto-form: *reconstruction [/proto_phonetic/]
-├── Phonetic Evolution: [detailed sound changes]
-├── Morphological Changes: [grammatical transformations]
-├── Semantic Evolution: [meaning shifts with dates]
-├── Cultural Route: lang₁ → lang₂ → lang₃ → modern
-└── Root Analysis: morpheme₁(meaning) + morpheme₂(meaning)
-
-Then explain with scientific detail:
-- Precise phonetic transformations (sound laws, regular changes)
-- Morphological adaptations (grammatical category shifts)
-- Semantic evolution with historical context
-- Cross-linguistic cognates and related forms
-- Modern dialectal variations
+WORD [/IPA/]
+├── Proto-form: *reconstruction [/proto_IPA/]
+├── Route: lang₁(date) → lang₂(date) → modern
+├── Phonetic: [key sound changes]
+├── Morphology: [category changes]
+├── Semantic: old_meaning → new_meaning
+└── Roots: morpheme₁(meaning) + morpheme₂(meaning)
 
 Examples:
-ALGORITHM [/ˈælɡərɪðəm/]
-├── Proto-form: *al-Khwārizmī [/al.xwaː.ɾiz.miː/]
-├── Phonetic Evolution: [xw] → [ɡ], [iː] → [ɪ], stress shift
-├── Morphological Changes: Arabic proper noun → European common noun
-├── Semantic Evolution: "from Khwarezm" → "calculation method" → "computer procedure"
-├── Cultural Route: Arabic (9th c.) → Medieval Latin algorismus → Old French → English
-└── Root Analysis: al(definite article) + Khwārizm(Central Asian region)
+СЛОН [/slon/]
+├── Proto-form: *laṅkā [/laŋkaː/]
+├── Route: Sanskrit(5th BCE) → Old Slavic → Russian
+├── Phonetic: [laŋ] → [lon] via metathesis
+├── Morphology: Sanskrit noun → Slavic noun
+├── Semantic: "Sri Lanka island" → "elephant"
+└── Roots: laṅkā(Ceylon island)
 
-PSYCHOLOGY [/saɪˈkɒlədʒi/]
-├── Proto-form: *psūkhē-logos [/psuː.kʰeː.lo.ɡos/]
-├── Phonetic Evolution: [ps] → [s], vowel reduction, stress shift
-├── Morphological Changes: Greek compound → Latin borrowing → vernacular adaptation
-├── Semantic Evolution: "soul study" → "mind study" → "behavior science"
-├── Cultural Route: Ancient Greek → Latin → French psychologie → English
-└── Root Analysis: psūkhē(soul/breath) + logos(study/discourse)
-
-Be scientific and concise. Around 150 words maximum with key transformations. Write entirely in ${language === "kyrgyz" ? "Kyrgyz" : language === "russian" ? "Russian" : "English"}.
-
-Use simple formatting - avoid special characters that need escaping.`;
+ONLY the tree - no additional explanation. Write in ${language === "kyrgyz" ? "Kyrgyz" : language === "russian" ? "Russian" : "English"}.`;
 
     const response = await openai.chat.completions.create({
       model: "gpt-4",
@@ -76,40 +59,64 @@ Use simple formatting - avoid special characters that need escaping.`;
         {
           role: "system",
           content:
-            "You are a historical linguist specializing in phonetic and morphological evolution. Present etymologies with detailed sound changes, morphological adaptations, and precise semantic development. Include IPA phonetic transcriptions, reconstruction of proto-forms, and step-by-step transformation processes. Focus on regular sound laws and systematic changes.",
+            "You are a linguist. Create ONLY compact visual trees showing etymology. No explanatory text - just the tree structure. Be concise.",
         },
         {
           role: "user",
           content: prompt,
         },
       ],
-      max_tokens: 250,
+      max_tokens: 150,
       temperature: 0.7,
     });
 
-    const content = response.choices[0]?.message?.content;
-    if (!content) {
-      console.error("No content in OpenAI response:", response);
-      throw new Error("Empty response from OpenAI");
-    }
-
-    // Check message length for Telegram limits (4096 chars)
-    if (content.length > 4000) {
-      console.warn(`Etymology too long: ${content.length} chars, truncating`);
-      return content.substring(0, 3800) + "\n\n[...]";
-    }
-
-    return content;
+    return response.choices[0]?.message?.content || "Tree generation failed";
   } catch (error) {
-    console.error("Error generating etymology:", error);
-    if (error.code === "insufficient_quota") {
-      throw new Error("OpenAI quota exceeded");
-    } else if (error.code === "invalid_api_key") {
-      throw new Error("Invalid OpenAI API key");
-    } else {
-      throw new Error(`API Error: ${error.message || "Unknown error"}`);
-    }
+    console.error("Error generating tree:", error);
+    throw error;
   }
+}
+
+export async function generateEtymologyDetails(language, word) {
+  try {
+    const basePrompt = LANGUAGE_PROMPTS[language] || LANGUAGE_PROMPTS.english;
+
+    const prompt = `${basePrompt} - provide detailed scientific explanation for the word: ${word}
+
+Explain ONLY:
+- Phonetic transformations with specific sound laws
+- Morphological adaptations and grammatical changes
+- Semantic evolution with historical context
+- Cross-linguistic cognates and related forms
+
+Be scientific and precise. Around 100 words maximum. Write entirely in ${language === "kyrgyz" ? "Kyrgyz" : language === "russian" ? "Russian" : "English"}.`;
+
+    const response = await openai.chat.completions.create({
+      model: "gpt-4",
+      messages: [
+        {
+          role: "system",
+          content:
+            "You are a historical linguist. Provide concise scientific explanations of word evolution focusing on precise phonetic laws and morphological changes.",
+        },
+        {
+          role: "user",
+          content: prompt,
+        },
+      ],
+      max_tokens: 150,
+      temperature: 0.6,
+    });
+
+    return response.choices[0]?.message?.content || "Details generation failed";
+  } catch (error) {
+    console.error("Error generating details:", error);
+    throw error;
+  }
+}
+
+export async function generateEtymology(language) {
+  return generateEtymologyTree(language);
 }
 
 export async function generateCentralAsianEtymology(language) {
