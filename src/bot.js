@@ -3,7 +3,6 @@ import { config } from "dotenv";
 import { getUser, saveUser, getUsersWithIntervals } from "./storage.js";
 import {
   generateEtymology,
-  generateEtymologyDetails,
   generateCentralAsianEtymology,
   getInterestExamples,
 } from "./etymology.js";
@@ -151,14 +150,7 @@ bot.command("etymology", async (ctx) => {
       ? await generateCentralAsianEtymology(user.language)
       : await generateEtymology(user.language);
 
-    await ctx.reply(etymology);
-
-    // Extract word for details
-    const wordMatch = etymology.match(/^(\S+)/);
-    const word = wordMatch ? wordMatch[1] : "word";
-
-    const details = await generateEtymologyDetails(user.language, word);
-    await ctx.reply(details, {
+    await ctx.reply(etymology, {
       reply_markup: createMoreButton(user.language),
     });
   } catch (error) {
@@ -226,14 +218,7 @@ bot.on("callback_query:data", async (ctx) => {
             ? await generateCentralAsianEtymology(user.language)
             : await generateEtymology(user.language);
 
-          await ctx.editMessageText(etymology);
-
-          // Extract word for details
-          const wordMatch = etymology.match(/^(\S+)/);
-          const word = wordMatch ? wordMatch[1] : "word";
-
-          const details = await generateEtymologyDetails(user.language, word);
-          await ctx.reply(details, {
+          await ctx.editMessageText(etymology, {
             reply_markup: createMoreButton(user.language),
           });
           await ctx.answerCallbackQuery();
@@ -256,14 +241,7 @@ bot.on("callback_query:data", async (ctx) => {
             ? await generateCentralAsianEtymology(user.language)
             : await generateEtymology(user.language);
 
-          await ctx.reply(etymology);
-
-          // Extract word for details
-          const wordMatch = etymology.match(/^(\S+)/);
-          const word = wordMatch ? wordMatch[1] : "word";
-
-          const details = await generateEtymologyDetails(user.language, word);
-          await ctx.reply(details, {
+          await ctx.reply(etymology, {
             reply_markup: createMoreButton(user.language),
           });
           await ctx.answerCallbackQuery();
@@ -360,14 +338,7 @@ function startScheduledSending() {
             ? await generateCentralAsianEtymology(user.language)
             : await generateEtymology(user.language);
 
-          await bot.api.sendMessage(user.userId, etymology);
-
-          // Extract word for details
-          const wordMatch = etymology.match(/^(\S+)/);
-          const word = wordMatch ? wordMatch[1] : "word";
-
-          const details = await generateEtymologyDetails(user.language, word);
-          await bot.api.sendMessage(user.userId, details, {
+          await bot.api.sendMessage(user.userId, etymology, {
             reply_markup: createMoreButton(user.language),
           });
           saveUser(user.userId, { lastSent: now.toISOString() });

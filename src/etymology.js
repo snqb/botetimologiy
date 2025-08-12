@@ -26,32 +26,41 @@ export function getInterestExamples(language) {
   return INTEREST_EXAMPLES[language] || INTEREST_EXAMPLES.english;
 }
 
-export async function generateEtymologyTree(language) {
+export async function generateEtymology(language) {
   try {
     const basePrompt = LANGUAGE_PROMPTS[language] || LANGUAGE_PROMPTS.english;
 
-    const prompt = `${basePrompt} - create ONLY the visual tree diagram for a fascinating word from any field.
+    const prompt = `${basePrompt} - create comprehensive etymology with visual tree + detailed explanation.
 
-Format: COMPACT TREE ONLY (no explanatory text):
+Format: SCIENTIFIC TREE + FULL EXPLANATION:
 
 WORD [/IPA/]
 ├── Proto-form: *reconstruction [/proto_IPA/]
-├── Route: lang₁(date) → lang₂(date) → modern
-├── Phonetic: [key sound changes]
-├── Morphology: [category changes]
-├── Semantic: old_meaning → new_meaning
-└── Roots: morpheme₁(meaning) + morpheme₂(meaning)
+├── Route: lang₁(date) → lang₂(date) → lang₃(date) → modern
+├── Phonetic Evolution: [detailed sound changes with rules]
+├── Morphological Changes: [grammatical transformations]
+├── Semantic Development: [meaning shifts with historical context]
+├── Cultural Context: [transmission circumstances]
+└── Root Analysis: morpheme₁(meaning) + morpheme₂(meaning)
+
+Then provide detailed explanation:
+- Step-by-step phonetic transformations with sound laws
+- Morphological adaptations and grammatical category shifts
+- Historical semantic evolution with dates and cultural context
+- Cross-linguistic cognates and comparative analysis
+- Cultural transmission circumstances and social factors
 
 Examples:
-СЛОН [/slon/]
-├── Proto-form: *laṅkā [/laŋkaː/]
-├── Route: Sanskrit(5th BCE) → Old Slavic → Russian
-├── Phonetic: [laŋ] → [lon] via metathesis
-├── Morphology: Sanskrit noun → Slavic noun
-├── Semantic: "Sri Lanka island" → "elephant"
-└── Roots: laṅkā(Ceylon island)
+ALGORITHM [/ˈælɡərɪðəm/]
+├── Proto-form: *al-Khwārizmī [/al.xwaː.ɾiz.miː/]
+├── Route: Arabic(9th c.) → Medieval Latin algorismus → Old French → English
+├── Phonetic Evolution: [xw] → [ɡ], [iː] → [ɪ], stress shift to initial
+├── Morphological Changes: Arabic proper noun → Latin masculine → English common noun
+├── Semantic Development: "from Khwarezm region" → "calculation method" → "computer procedure"
+├── Cultural Context: Islamic mathematics transmission via translation movement
+└── Root Analysis: al(definite article) + Khwārizm(Central Asian region)
 
-ONLY the tree - no additional explanation. Write in ${language === "kyrgyz" ? "Kyrgyz" : language === "russian" ? "Russian" : "English"}.`;
+Be thorough and scientific. Around 300-400 words with complete linguistic analysis. Write entirely in ${language === "kyrgyz" ? "Kyrgyz" : language === "russian" ? "Russian" : "English"}.`;
 
     const response = await openai.chat.completions.create({
       model: "gpt-4",
@@ -59,91 +68,67 @@ ONLY the tree - no additional explanation. Write in ${language === "kyrgyz" ? "K
         {
           role: "system",
           content:
-            "You are a linguist. Create ONLY compact visual trees showing etymology. No explanatory text - just the tree structure. Be concise.",
+            "You are a historical linguist specializing in comprehensive etymological analysis. Provide detailed scientific explanations with visual trees, phonetic laws, morphological changes, and cultural transmission context. Be thorough and precise.",
         },
         {
           role: "user",
           content: prompt,
         },
       ],
-      max_tokens: 150,
+      max_tokens: 800,
       temperature: 0.7,
     });
 
-    return response.choices[0]?.message?.content || "Tree generation failed";
+    const content = response.choices[0]?.message?.content;
+    if (!content) {
+      console.error("No content in OpenAI response:", response);
+      throw new Error("Empty response from OpenAI");
+    }
+
+    // Check message length for Telegram limits (4096 chars)
+    if (content.length > 4000) {
+      console.warn(`Etymology too long: ${content.length} chars, truncating`);
+      return content.substring(0, 3800) + "\n\n[...]";
+    }
+
+    return content;
   } catch (error) {
-    console.error("Error generating tree:", error);
-    throw error;
+    console.error("Error generating etymology:", error);
+    if (error.code === "insufficient_quota") {
+      throw new Error("OpenAI quota exceeded");
+    } else if (error.code === "invalid_api_key") {
+      throw new Error("Invalid OpenAI API key");
+    } else {
+      throw new Error(`API Error: ${error.message || "Unknown error"}`);
+    }
   }
-}
-
-export async function generateEtymologyDetails(language, word) {
-  try {
-    const basePrompt = LANGUAGE_PROMPTS[language] || LANGUAGE_PROMPTS.english;
-
-    const prompt = `${basePrompt} - provide detailed scientific explanation for the word: ${word}
-
-Explain ONLY:
-- Phonetic transformations with specific sound laws
-- Morphological adaptations and grammatical changes
-- Semantic evolution with historical context
-- Cross-linguistic cognates and related forms
-
-Be scientific and precise. Around 100 words maximum. Write entirely in ${language === "kyrgyz" ? "Kyrgyz" : language === "russian" ? "Russian" : "English"}.`;
-
-    const response = await openai.chat.completions.create({
-      model: "gpt-4",
-      messages: [
-        {
-          role: "system",
-          content:
-            "You are a historical linguist. Provide concise scientific explanations of word evolution focusing on precise phonetic laws and morphological changes.",
-        },
-        {
-          role: "user",
-          content: prompt,
-        },
-      ],
-      max_tokens: 150,
-      temperature: 0.6,
-    });
-
-    return response.choices[0]?.message?.content || "Details generation failed";
-  } catch (error) {
-    console.error("Error generating details:", error);
-    throw error;
-  }
-}
-
-export async function generateEtymology(language) {
-  return generateEtymologyTree(language);
 }
 
 export async function generateCentralAsianEtymology(language) {
   try {
     const basePrompt = LANGUAGE_PROMPTS[language] || LANGUAGE_PROMPTS.english;
 
-    const culturalPrompt = `${basePrompt} focusing on Central Asian etymology and Silk Road word migrations.
+    const culturalPrompt = `${basePrompt} focusing on Central Asian etymology and cultural word migrations.
 
-FOCUS: Scientific analysis of Central Asian etymology with detailed transformations.
+FOCUS: Detailed Central Asian linguistic analysis with cultural transmission.
 
-Priority areas:
-- Kyrgyz-Persian-Arabic contact linguistics (Islamic scholarly transmission)
-- Russian-Kyrgyz phonetic adaptations (Soviet language contact)
-- Ancient Turkic reconstructions and cognate analysis
+Priority word types:
+- Kyrgyz words from Arabic/Persian (Islamic scholarly transmission)
+- Russian words adapted into Kyrgyz (Soviet linguistic contact)
+- Ancient Turkic reconstructions across language families
 - Silk Road trade terminology with systematic sound changes
-- Nomadic-to-sedentary cultural linguistic shifts
+- Nomadic-to-sedentary cultural linguistic adaptations
 
-Format with SCIENTIFIC CULTURAL TREE:
+Create comprehensive visual tree:
 
 WORD [/modern_IPA/]
-├── Etymology: *proto-form [/proto_IPA/] → intermediate [/inter_IPA/]
-├── Phonetic Laws: [specific sound change rules]
-├── Morphological Adaptation: [grammatical category changes]
-├── Semantic Development: [meaning evolution with dates]
-├── Cultural Transmission: [detailed migration context]
-├── Route: source_lang(date) → intermediate(date) → target(date)
-└── Cognates: [related forms in other languages]
+├── Proto-form: *reconstruction [/proto_IPA/]
+├── Cultural Route: source_culture(date) → intermediate → target_culture(date)
+├── Transmission Context: [why word traveled - trade/religion/politics/science]
+├── Phonetic Evolution: [detailed sound change rules and processes]
+├── Morphological Shifts: [grammatical adaptations and category changes]
+├── Semantic Development: [meaning evolution with historical contexts]
+└── Cognate Analysis: [related forms across Turkic/Persian/Arabic languages]
 
 Examples:
 БАКЧА [/bɑq.t͡ʃɑ/] "garden"
@@ -155,7 +140,7 @@ Examples:
 ├── Route: Old Persian (6th c.) → Classical Persian (9th c.) → Chagatai Turkic → Kyrgyz
 └── Cognates: Uzbek bog'cha, Kazakh бақша, Turkish bahçe
 
-Show precise linguistic analysis with scientific methodology. Around 150 words maximum in ${language === "kyrgyz" ? "Kyrgyz" : language === "russian" ? "Russian" : "English"}.`;
+Show comprehensive linguistic analysis with detailed scientific methodology and cultural context. Around 400-500 words with complete analysis. Write entirely in ${language === "kyrgyz" ? "Kyrgyz" : language === "russian" ? "Russian" : "English"}.`;
 
     const response = await openai.chat.completions.create({
       model: "gpt-4",
@@ -170,7 +155,7 @@ Show precise linguistic analysis with scientific methodology. Around 150 words m
           content: culturalPrompt,
         },
       ],
-      max_tokens: 250,
+      max_tokens: 1000,
       temperature: 0.6,
     });
 
