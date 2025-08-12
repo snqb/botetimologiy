@@ -6,7 +6,7 @@
 - Telegram Bot Token (from @BotFather)
 - OpenAI API Key
 
-## Quick Setup
+## Local Setup
 
 1. **Install dependencies**
 ```bash
@@ -33,6 +33,34 @@ OPENAI_API_KEY=your_openai_key_here
 
 5. **Run the bot**
 ```bash
+pnpm start
+```
+
+## Deployment
+
+### Railway Platform
+1. Connect GitHub repo to Railway
+2. Set environment variables:
+   - `TELEGRAM_BOT_TOKEN`
+   - `OPENAI_API_KEY`
+3. Railway auto-deploys using `railway.json` config
+
+### Docker
+```bash
+# Build image
+docker build -t etymology-bot .
+
+# Run container
+docker run -e TELEGRAM_BOT_TOKEN=your_token -e OPENAI_API_KEY=your_key etymology-bot
+```
+
+### Manual Server
+```bash
+# On your server
+git clone your-repo
+cd etymology-bot
+pnpm install
+# Set environment variables
 pnpm start
 ```
 

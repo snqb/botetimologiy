@@ -23,6 +23,8 @@
 - [x] Visual tree diagrams showing word evolution paths
 - [x] Cross-cultural etymology focus (Silk Road, Soviet influence, Arabic/Persian borrowings)
 - [x] Cultural migration routes in etymology explanations
+- [x] Dockerfile for containerized deployment
+- [x] Railway.json for Railway platform deployment
 
 ### In Progress
 - [x] Testing with real Telegram bot
@@ -36,14 +38,16 @@
 1. Verify OpenAI API integration with new cultural prompts
 2. Test visual tree formatting in Telegram
 3. Test scheduling functionality with mixed etymology types
-4. Optional: Add etymology type preferences (cultural vs standard)
-5. Optional: Add etymology favoriting/bookmarking
+4. Deploy to Railway platform
+5. Optional: Add etymology type preferences (cultural vs standard)
+6. Optional: Add etymology favoriting/bookmarking
 
 ### Technical Decisions
 - **Bot Framework**: Grammy (modern, TypeScript-friendly)
 - **Storage**: Simple JSON file (minimal approach)
 - **AI**: OpenAI API for etymology generation
 - **Scheduling**: Node.js setInterval (simple, no external deps)
+- **Deployment**: Docker + Railway platform
 
 ### Notes
 - Keep it minimal - no classes, just functions
@@ -63,11 +67,24 @@
 - [x] Complete full bot implementation
 
 ### Ready to Deploy
-Bot is complete with mathematical diagrams! Just need:
+Bot is complete with visual trees and cultural focus! 
+
+**Local deployment:**
 1. Get Telegram bot token from @BotFather
 2. Get OpenAI API key
 3. Set up .env file
 4. Run `pnpm install && pnpm start`
+
+**Railway deployment:**
+1. Connect GitHub repo to Railway
+2. Set environment variables (TELEGRAM_BOT_TOKEN, OPENAI_API_KEY)
+3. Railway will auto-deploy using Dockerfile
+
+**Docker deployment:**
+```bash
+docker build -t etymology-bot .
+docker run -e TELEGRAM_BOT_TOKEN=your_token -e OPENAI_API_KEY=your_key etymology-bot
+```
 
 ### Latest Updates
 - Made etymologies mathematical and analytical
