@@ -83,7 +83,11 @@ Bot is complete with visual trees and cultural focus!
 **Docker deployment:**
 ```bash
 docker build -t etymology-bot .
-docker run -e TELEGRAM_BOT_TOKEN=your_token -e OPENAI_API_KEY=your_key etymology-bot
+docker run -d --name etymology-bot \
+  -e TELEGRAM_BOT_TOKEN=your_token \
+  -e OPENAI_API_KEY=your_key \
+  -v $(pwd)/data:/app/data \
+  etymology-bot
 ```
 
 ### Latest Updates
