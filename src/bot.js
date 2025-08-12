@@ -57,7 +57,7 @@ function createLanguageKeyboard() {
   return keyboard.resized();
 }
 
-function createEtymologyButtons(language) {
+function createMoreButton(language) {
   const moreText =
     language === "kyrgyz"
       ? "Дагы 📚"
@@ -65,16 +65,7 @@ function createEtymologyButtons(language) {
         ? "Ещё 📚"
         : "More 📚";
 
-  const detailsText =
-    language === "kyrgyz"
-      ? "Толук маалымат 🔬"
-      : language === "russian"
-        ? "Подробности 🔬"
-        : "Details 🔬";
-
-  return new InlineKeyboard()
-    .text(detailsText, "etymology_details")
-    .text(moreText, "more_etymology");
+  return new InlineKeyboard().text(moreText, "more_etymology");
 }
 
 function createMainMenu(language) {
@@ -160,8 +151,15 @@ bot.command("etymology", async (ctx) => {
       ? await generateCentralAsianEtymology(user.language)
       : await generateEtymology(user.language);
 
-    await ctx.reply(etymology, {
-      reply_markup: createEtymologyButtons(user.language),
+    await ctx.reply(etymology);
+
+    // Extract word for details
+    const wordMatch = etymology.match(/^(\S+)/);
+    const word = wordMatch ? wordMatch[1] : "word";
+
+    const details = await generateEtymologyDetails(user.language, word);
+    await ctx.reply(details, {
+      reply_markup: createMoreButton(user.language),
     });
   } catch (error) {
     console.error("Etymology command error:", error.message);
@@ -216,28 +214,7 @@ bot.on("callback_query:data", async (ctx) => {
     const data = ctx.callbackQuery.data;
     const user = getUser(ctx.from.id);
 
-    if (data === "etymology_details") {
-      if (user && user.language) {
-        try {
-          await ctx.replyWithChatAction("typing");
-
-          // Extract word from current message for details
-          const currentText = ctx.callbackQuery.message.text;
-          const wordMatch = currentText.match(/^(\S+)/);
-          const word = wordMatch ? wordMatch[1] : "word";
-
-          const details = await generateEtymologyDetails(user.language, word);
-          await ctx.reply(details);
-          await ctx.answerCallbackQuery();
-        } catch (error) {
-          console.error("Details button error:", error.message);
-          const msg = MESSAGES[user.language] || MESSAGES.english;
-          await ctx.answerCallbackQuery(`${msg.error}: ${error.message}`);
-        }
-      } else {
-        await ctx.answerCallbackQuery("Please setup the bot first with /start");
-      }
-    } else if (data === "more_etymology") {
+    if (data === "more_etymology") {
       if (user && user.language) {
         try {
           // Show typing indicator
@@ -249,8 +226,15 @@ bot.on("callback_query:data", async (ctx) => {
             ? await generateCentralAsianEtymology(user.language)
             : await generateEtymology(user.language);
 
-          await ctx.editMessageText(etymology, {
-            reply_markup: createEtymologyButtons(user.language),
+          await ctx.editMessageText(etymology);
+
+          // Extract word for details
+          const wordMatch = etymology.match(/^(\S+)/);
+          const word = wordMatch ? wordMatch[1] : "word";
+
+          const details = await generateEtymologyDetails(user.language, word);
+          await ctx.reply(details, {
+            reply_markup: createMoreButton(user.language),
           });
           await ctx.answerCallbackQuery();
         } catch (error) {
@@ -272,8 +256,15 @@ bot.on("callback_query:data", async (ctx) => {
             ? await generateCentralAsianEtymology(user.language)
             : await generateEtymology(user.language);
 
-          await ctx.reply(etymology, {
-            reply_markup: createEtymologyButtons(user.language),
+          await ctx.reply(etymology);
+
+          // Extract word for details
+          const wordMatch = etymology.match(/^(\S+)/);
+          const word = wordMatch ? wordMatch[1] : "word";
+
+          const details = await generateEtymologyDetails(user.language, word);
+          await ctx.reply(details, {
+            reply_markup: createMoreButton(user.language),
           });
           await ctx.answerCallbackQuery();
         } catch (error) {
@@ -369,8 +360,15 @@ function startScheduledSending() {
             ? await generateCentralAsianEtymology(user.language)
             : await generateEtymology(user.language);
 
-          await bot.api.sendMessage(user.userId, etymology, {
-            reply_markup: createEtymologyButtons(user.language),
+          await bot.api.sendMessage(user.userId, etymology);
+
+          // Extract word for details
+          const wordMatch = etymology.match(/^(\S+)/);
+          const word = wordMatch ? wordMatch[1] : "word";
+
+          const details = await generateEtymologyDetails(user.language, word);
+          await bot.api.sendMessage(user.userId, details, {
+            reply_markup: createMoreButton(user.language),
           });
           saveUser(user.userId, { lastSent: now.toISOString() });
         } catch (error) {
